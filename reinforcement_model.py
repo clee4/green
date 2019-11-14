@@ -29,7 +29,10 @@ def one_hot(state):
 	return current_state
 
 def get_outcome(state):
-	total_reward = 0
+    """
+    Checks win conditions
+    """
+    total_reward = 0
 
 	if (state[0] == state[1] == state[2]) and not state[0] == 0:
 		total_reward = state[0]	
@@ -51,14 +54,20 @@ def get_outcome(state):
 	return total_reward
 
 def process_games(games, model, model_num, file_name, reward_dep=.7):
+    # numbers of times that x won, o won, and ties
     xt = 0
     ot = 0
     dt = 0
+    # stores list of states
     states = []
+    # stores list of q values for a given board state
     q_values = []
 
+    # iterates through a fully played game
     for game in games:
+        # figures out which player won
         total_reward = get_outcome(game[len(game) - 1])
+        # counts number of wins or ties
         if total_reward == -1:
             ot += 1
         elif total_reward == 1:
@@ -66,7 +75,9 @@ def process_games(games, model, model_num, file_name, reward_dep=.7):
         else:
             dt += 1
 
+        # iterates through moves for a player in a given game
         for i in range(model_num-1, len(game)-1, 2):
+            # For each state of a game iterate through each position
             for j in range(0, 9):
                 if not game[i][j] == game[i + 1][j]:
                     reward_vector = np.zeros(9)
@@ -75,13 +86,18 @@ def process_games(games, model, model_num, file_name, reward_dep=.7):
                     states.append(game[i].copy())
                     q_values.append(reward_vector.copy())
 
+    # aligns states with q table
     zipped = list(zip(states, q_values))
+    # shuffles values for model training
     random.shuffle(zipped)
+    # unzips states and q tables
     states, q_values = zip(*zipped)
     new_states = []
+    # one hot encodes states
     for state in states:
         new_states.append(one_hot(state))
 
+    # trains model on state
     model.fit(np.asarray(new_states), np.asarray(q_values), epochs=2, 
               batch_size=len(q_values), verbose=1)
 
