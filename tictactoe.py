@@ -47,6 +47,19 @@ class tictactoe:
             print(self.__str__())
             return win
 
+    def one_hot(self):
+        """
+        One hot encodes current grid state
+
+        """
+        mapp = {"":[1,0,0], "o":[0,1,0], "x":[0,0,1]}
+        one_hot_grid = []
+        
+        for i in range(9):
+            one_hot_grid.append(mapp[self.grid[i]])
+
+        return one_hot_grid
+
     def check_move(self, move):
         """
         Checks to see if move is legal
