@@ -10,14 +10,14 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np # we always love numpy
 import time
-import tictactoe
 
 class Mytictactoe(nn.Module):
     # The init funciton in Pytorch classes is used to keep track of the parameters of the model
     # specifically the ones we want to update with gradient descent + backprop
     # So we need to make sure we keep track of all of them here
-    def __init__(self):
+    def __init__(self, iterations, learning_rate=.1, discount=.95):
         super(Mytictactoe, self).__init__()
+
         # layers defined here
         # we'll use this activation function internally in the network
         self.activation_func = torch.nn.ReLU()
@@ -51,13 +51,9 @@ class Mytictactoe(nn.Module):
 
         return x
 
-    def get_reward(self):
-        
-    # The loss function (which we chose to include as a method of the class, but doesn't need to be)
-    # returns the loss and optimizer used by the model
-    def get_loss(self, learning_rate):
-      # Loss function
-      loss = nn.CrossEntropyLoss()
-      # Optimizer, self.parameters() returns all the Pytorch operations that are attributes of the class
-      optimizer = optim.Adam(self.parameters(), lr=learning_rate)
-      return loss, optimizer
+    def get_loss(self):
+        # Loss function
+        loss = nn.CrossEntropyLoss()
+        # Optimizer, self.parameters() returns all the Pytorch operations that are attributes of the class
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
+        return loss, optimizer
