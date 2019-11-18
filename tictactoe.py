@@ -1,14 +1,9 @@
 import learning_model
 
 class tictactoe:
-    def __init__(self, iterations, learning_rate = 0.1, discount = 0.95):
+    def __init__(self):
         
         self.grid = [""] * 9
-
-        self.learning_rate = learning_rate
-        self.discount = discount # How much we appreciate future reward over current
-        self.exploration_rate = 1.0 # Initial exploration rate
-        self.exploration_delta = 1.0 / iterations # Shift from exploration to explotation
 
     # Tic Tac Toe Mechanics
     def __str__(self):

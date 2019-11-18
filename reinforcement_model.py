@@ -34,24 +34,24 @@ def get_outcome(state):
     """
     total_reward = 0
 
-	if (state[0] == state[1] == state[2]) and not state[0] == 0:
-		total_reward = state[0]	
-	elif (state[3] == state[4] == state[5]) and not state[3] == 0:
-		total_reward = state[3]	
-	elif (state[6] == state[7] == state[8]) and not state[6] == 0:
-		total_reward = state[6]	
-	elif (state[0] == state[3] == state[6]) and not state[0] == 0:
-		total_reward = state[0]	
-	elif (state[1] == state[4] == state[7]) and not state[1] == 0:
-		total_reward = state[1]	
-	elif (state[2] == state[5] == state[8]) and not state[2] == 0:
-		total_reward = state[2]	
-	elif (state[0] == state[4] == state[8]) and not state[0] == 0:
-		total_reward = state[0]	
-	elif (state[2] == state[4] == state[6]) and not state[2] == 0:
-		total_reward = state[2]
+    if (state[0] == state[1] == state[2]) and not state[0] == 0:
+        total_reward = state[0]	
+    elif (state[3] == state[4] == state[5]) and not state[3] == 0:
+        total_reward = state[3]	
+    elif (state[6] == state[7] == state[8]) and not state[6] == 0:
+        total_reward = state[6]	
+    elif (state[0] == state[3] == state[6]) and not state[0] == 0:
+        total_reward = state[0]	
+    elif (state[1] == state[4] == state[7]) and not state[1] == 0:
+        total_reward = state[1]	
+    elif (state[2] == state[5] == state[8]) and not state[2] == 0:
+        total_reward = state[2]	
+    elif (state[0] == state[4] == state[8]) and not state[0] == 0:
+        total_reward = state[0]	
+    elif (state[2] == state[4] == state[6]) and not state[2] == 0:
+        total_reward = state[2]
 
-	return total_reward
+    return total_reward
 
 def process_games(games, model, model_num, file_name, reward_dep=.7):
     # numbers of times that x won, o won, and ties
@@ -89,6 +89,7 @@ def process_games(games, model, model_num, file_name, reward_dep=.7):
                     q_values.append(reward_vector.copy())
 
     # aligns states with q table
+    print(q_values)
     zipped = list(zip(states, q_values))
     # shuffles values for model training
     random.shuffle(zipped)
