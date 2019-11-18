@@ -30,7 +30,7 @@ def one_hot(state):
 
 def get_outcome(state):
     """
-    Checks win conditions
+    Checks win conditions and returns a reward
     """
     total_reward = 0
 
@@ -63,9 +63,9 @@ def process_games(games, model, model_num, file_name, reward_dep=.7):
     # stores list of q values for a given board state
     q_values = []
 
-    # iterates through a fully played game
+    # iterates through a bunch of fully played game
     for game in games:
-        # figures out which player won
+        # figures out which players won
         total_reward = get_outcome(game[len(game) - 1])
         # counts number of wins or ties
         if total_reward == -1:
@@ -79,7 +79,9 @@ def process_games(games, model, model_num, file_name, reward_dep=.7):
         for i in range(model_num-1, len(game)-1, 2):
             # For each state of a game iterate through each position
             for j in range(0, 9):
+                # If the game ends early due to a win case
                 if not game[i][j] == game[i + 1][j]:
+                    # Reward vector for that game
                     reward_vector = np.zeros(9)
                     reward_vector[j] = total_reward*(reward_dep**(math.floor((len(game) - i) / 2) - 1))
                     # print(reward_vector)

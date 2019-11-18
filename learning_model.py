@@ -17,7 +17,7 @@ class Mytictactoe(nn.Module):
     # The init funciton in Pytorch classes is used to keep track of the parameters of the model
     # specifically the ones we want to update with gradient descent + backprop
     # So we need to make sure we keep track of all of them here
-    def __init__(self):
+    def __init__(self, iterations, learning_rate=.1, discount=.95):
         super(Mytictactoe, self).__init__()
         # learning rate
         self.lr = .001

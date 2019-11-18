@@ -1,8 +1,16 @@
+import learning_model
+
 class tictactoe:
-    def __init__(self):
+    def __init__(self, iterations, learning_rate = 0.1, discount = 0.95):
         
         self.grid = [""] * 9
 
+        self.learning_rate = learning_rate
+        self.discount = discount # How much we appreciate future reward over current
+        self.exploration_rate = 1.0 # Initial exploration rate
+        self.exploration_delta = 1.0 / iterations # Shift from exploration to explotation
+
+    # Tic Tac Toe Mechanics
     def __str__(self):
         """
         Formats the print to print a grid i.e.
@@ -123,20 +131,96 @@ class tictactoe:
                     return self.grid[i]
         return ""
 
-if __name__ == "__main__":
-    asdf = tictactoe()
-    asdf.update_grid([1,'x'])
-    asdf.update_grid([4,'x'])
-    asdf.update_grid([7,'x'])
-    asdf.clear_grid()
-    
-    asdf.update_grid([2,'o'])
-    asdf.update_grid([4,'o'])
-    asdf.update_grid([6,'o'])
 
-    asdf.clear_grid()
+
+
+    # Learning Aspect
+    def get_reward(self):
+
+    def one_hot(self):
+        """
+        One hot encodes current grid state
+
+        """
+        mapp = {"":[1,0,0], "o":[0,1,0], "x":[0,0,1]}
+        one_hot_grid = []
+        
+        for i in range(9):
+            one_hot_grid.append(mapp[self.grid[i]])
+
+        return one_hot_grid
+
+    def select_random_move(board):
+        while True:
+            c = random.randint(0, 8)
+            if board[c] == 0:
+                return c
+
+    def select_strategic_move(board, model):
+
+
+    def play_and_train(model, model_2, games_until_training=1000, total_games=8000, e_greedy=.7):
+        board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        
+        games = []
+        current_game = []
+
+        for i in range(0, total_games):
+            playing = True
+            nn_turn = True
+            board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            # sides --> -1 = Os, 1 = Xs
+            current_game = []
+            current_game.append(board.copy())
+
+            while playing:
+                if nn_turn:
+                    if random.uniform(0, 1) <= e_greedy:
+                        board[select_random_move(model,board)]=1
+                        current_game.append(board.copy())
+                    else:
+                        board[select_smart_move(model, board)] = 1
+                        current_game.append(board.copy())
+
+                else:
+                    if random.uniform(0, 1) <= e_greedy:
+                        board[select_random_move(model_2,board)] = -1
+                        current_game.append(board.copy())
+                    else:
+                        board[select_smart_move(model_2, board)] = -1
+                        current_game.append(board.copy())
+
+                playable = False
+
+                for square in board:
+                    if square == 0:
+                        playable = True
+
+                if not get_outcome(board) == 0:
+                    playable = False
+
+                if not playable:
+                    playing = False
+
+                nn_turn = not nn_turn
+
+            games.append(current_game)
+
+
+if __name__ == "__main__":
+    # asdf = tictactoe()
+    # asdf.update_grid([1,'x'])
+    # asdf.update_grid([4,'x'])
+    # asdf.update_grid([7,'x'])
+    # asdf.clear_grid()
     
-    asdf.update_grid([0,'o'])
-    asdf.update_grid([1,'o'])
-    asdf.update_grid([2,'o'])
+    # asdf.update_grid([2,'o'])
+    # asdf.update_grid([4,'o'])
+    # asdf.update_grid([6,'o'])
+
+    # asdf.clear_grid()
+    
+    # asdf.update_grid([0,'o'])
+    # asdf.update_grid([1,'o'])
+    # asdf.update_grid([2,'o'])
 
