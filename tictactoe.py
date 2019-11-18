@@ -23,29 +23,33 @@ class tictactoe:
         
         return grid
 
+    def get_grid(self):
+        """
+        returns list with state of the grid
+        """
+        return self.grid
+
     def clear_grid(self):
         """
         Clears the grid to all empty strings (like starting state)
         """
         self.grid = [""] * 9
     
-    def update_grid(self, move):
+    def update_grid(self, index, move):
         """
         Checks to make sure the move is legal, then executes the move and checks if a win case was reached
         
-        move: [grid index, move]
+        index: position to place move
+        move: x or an o
         
         returns "x" or "o" to indicate which won if a win case was reached, otherwise nothing is returned
         """
-        if not self.check_move(move):
-            return "Invalid Move"
-
-        self.grid[move[0]] = move[1].lower()
+        self.grid[index] = move.lower()
         
         win = self.check_win()
         if win is not "":
             print(self.__str__())
-            return win
+        return win
 
     def one_hot(self):
         """
@@ -59,18 +63,6 @@ class tictactoe:
             one_hot_grid.append(mapp[self.grid[i]])
 
         return one_hot_grid
-
-    def check_move(self, move):
-        """
-        Checks to see if move is legal
-
-        move: [grid index, move]
-
-        returns boolean
-        """
-        if len(self.grid[move[0]]) > 0 or move[0] > 8 or move[0] < 0:
-            return False
-        return True
 
     def check_win(self):
         """
