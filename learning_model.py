@@ -13,13 +13,13 @@ import time
 import random
 import math
 
-from tictactoe import tictactoe
+import tictactoe
 
 class Mytictactoe(nn.Module):
     # The init funciton in Pytorch classes is used to keep track of the parameters of the model
     # specifically the ones we want to update with gradient descent + backprop
     # So we need to make sure we keep track of all of them here
-    def __init__(self, iterations, learning_rate=.01):
+    def __init__(self, learning_rate=.01):
         super(Mytictactoe, self).__init__()
         # learning rate
         self.lr = learning_rate
@@ -56,11 +56,18 @@ class Mytictactoe(nn.Module):
         x = self.fc5(x)
 
         return x
+
+    def get_loss(self):
+        # Loss function
+        loss = nn.MSELoss()
+        # Optimizer, self.parameters() returns all the Pytorch operations that are attributes of the class
+        optimizer = optim.Adam(self.parameters(), lr=self.lr)
+        return loss, optimizer
         
     
 class play_and_train:
     def __init__(self, model, discount=.85, explore=.3):
-        self.game = tictactoe()
+        self.game = tictactoe.tictactoe()
         self.model = model
 
         # discount factor
@@ -68,12 +75,61 @@ class play_and_train:
         # exploration rate
         self.e = explore
 
-    def train_model(self, batch_size, num_batches):
-        for i in range(batch_size):
-            game, winner = self.play_game()
-            
-            states, q_tables = self.get_reward(winner, game)
+        self.device = 'cpu'
 
+    def one_hot(self, grid):
+        """
+        One hot encodes current grid state
+
+        """
+        mapp = {"":[1,0,0], "o":[0,1,0], "x":[0,0,1]}
+        one_hot_grid = []
+        
+        for i in range(9):
+            one_hot_grid = one_hot_grid + mapp[grid[i]]
+
+        return one_hot_grid
+
+    def train_model(self, batch_size, num_batches):
+        loss, optimizer = self.model.get_loss()
+        # Data stuff
+        for i in range(num_batches):
+            if (100*(i+1)/num_batches % 10 == 0):
+                print(100*(i+1)/num_batches, "\% training completion")
+
+            states = []
+            rewards = []
+            # List of states and games
+            for _ in range(batch_size):
+                game, winner = self.play_game()
+                
+                outcome, q_tables = self.get_reward(winner, game)
+
+                states = states + outcome
+                rewards = rewards + q_tables
+            # Train Model
+            # convert data type to tensor
+            states = torch.FloatTensor(states)
+            rewards = torch.FloatTensor(rewards)
+            
+            for j in range(len(states)):
+                # send to cuda
+                # Rewards are the labels, states are the inputs
+                # print(states[j])
+                inputs = Variable(states[j]).to(self.device)
+                labels = Variable(rewards[j]).to(self.device)
+                
+                optimizer.zero_grad()
+
+                #Forward ,'\n', labels)
+                # Compute the loss and find the loss with respect to each parameter of the model
+                loss_size = lospass
+                outputs = self.model(inputs)
+                # print(outputss(outputs, labels)
+                loss_size.backward()
+
+                # Change each parameter with respect to the recently computed loss.
+                optimizer.step()
 
     def get_reward(self, winner, game):
         """
@@ -100,12 +156,13 @@ class play_and_train:
             reward_vector = np.zeros(9)
             reward_vector[game[i][-1]] = reward_multiplier[player]*(self.g**(math.floor((len(game) - i) / 2) - 1))
 
-            states.append(game[i][0])
+            # Append the one hot version of the game state and the corresponding q_table
+            states.append(self.one_hot(game[i][0]))
             q_tables.append(reward_vector)    
             
         return (states, q_tables)
     
-    def play_game(self):
+    def play_game(self, training=True):
         """
         return list of game states and which move was made at each turn
         """
@@ -115,14 +172,17 @@ class play_and_train:
         states = []
         
         for i in range(9):
-            explore = True if random.random() < self.model.e else False
+            explore = True if random.random() < self.e else False
             turn = player[i%2]
             state = self.game.get_grid()
+            
+            if not training:
+                print(self.game)
 
-            if explore:
+            if explore and not training:
                 move = self.random_move()
             else:
-                move = self.greedy_move()
+                move = self.greedy_move(state)
             
             states.append([state, move])
 
@@ -134,13 +194,18 @@ class play_and_train:
         
         return (states, winner)
     
-    def greedy_move(self):
+    def greedy_move(self, state):
         """
         Selects best move based on q table
 
         returns index of selected move
         """
-        pass
+        tensor_grid = torch.FloatTensor(self.one_hot(state))
+        output = self.model(Variable(tensor_grid).to(self.device))
+        
+        output = output.detach().numpy()
+
+        return np.argmax(output)
 
     def random_move(self):
         """
@@ -156,3 +221,10 @@ class play_and_train:
                 move_list.append(i)
         
         return random.choice(move_list)
+
+if __name__ == "__main__":
+    net = Mytictactoe()
+    player = play_and_train(net)
+    player.train_model(32, 50)
+
+    player.play_game(False)
