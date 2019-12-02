@@ -66,7 +66,7 @@ class Mytictactoe(nn.Module):
         
     
 class play_and_train:
-    def __init__(self, model, discount=.85, explore=.3):
+    def __init__(self, model, discount=.85, explore=.35):
         self.game = tictactoe.tictactoe()
         self.model = model
 
@@ -94,8 +94,8 @@ class play_and_train:
         loss, optimizer = self.model.get_loss()
         # Data stuff
         for i in range(num_batches):
-            if (100*(i+1)/num_batches % 10 == 0):
-                print(100*(i+1)/num_batches, "\% training completion")
+            if (100*(i+1)/num_batches % 5 == 0):
+                print(100*(i+1)/num_batches, "% training completion")
 
             states = []
             rewards = []
@@ -122,10 +122,10 @@ class play_and_train:
                 optimizer.zero_grad()
 
                 #Forward ,'\n', labels)
-                # Compute the loss and find the loss with respect to each parameter of the model
-                loss_size = lospass
                 outputs = self.model(inputs)
-                # print(outputss(outputs, labels)
+
+                # Compute the loss and find the loss with respect to each parameter of the model
+                loss_size = loss(outputs, labels)
                 loss_size.backward()
 
                 # Change each parameter with respect to the recently computed loss.
@@ -142,9 +142,9 @@ class play_and_train:
         reward_multiplier = {"x":1, "o":1}
 
         if winner is "x":
-            reward_multiplier = {"x":4, "o":-2}
+            reward_multiplier = {"x":1, "o":-1}
         elif winner is "o":
-            reward_multiplier = {"x":-2, "o":4}
+            reward_multiplier = {"x":-1, "o":1}
 
         # lists to hold the entire games positions and corresponding q_table
         states = []
@@ -176,8 +176,6 @@ class play_and_train:
             turn = player[i%2]
             state = self.game.get_grid()
             
-            if not training:
-                print(self.game)
 
             if explore and not training:
                 move = self.random_move()
@@ -187,6 +185,9 @@ class play_and_train:
             states.append([state, move])
 
             winner = self.game.update_grid(move, turn)
+
+            if not training:
+                print(self.game)
 
             # this will need to be tweaked to work better for rewards
             if winner is not "":
@@ -205,7 +206,15 @@ class play_and_train:
         
         output = output.detach().numpy()
 
-        return np.argmax(output)
+        # Make sure that the move is legal
+        while True:
+            #print(output, "\n", state)
+            best_move = np.argmax(output)
+            if state[best_move] is "":
+                return best_move
+            else:
+                # make the best move undesirable if it is illegal
+                output[best_move] = -1000
 
     def random_move(self):
         """
@@ -216,15 +225,17 @@ class play_and_train:
         grid = self.game.get_grid()
 
         move_list = []
+        # Append all legal moves to a move list
         for i in range(9):
             if grid[i] is "":
                 move_list.append(i)
         
+        # Choose a random move from legal moves
         return random.choice(move_list)
 
 if __name__ == "__main__":
     net = Mytictactoe()
     player = play_and_train(net)
-    player.train_model(32, 50)
+    player.train_model(10, 1000)
 
     player.play_game(False)
