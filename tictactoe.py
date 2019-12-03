@@ -52,6 +52,23 @@ class tictactoe:
         win = self.check_win()
         return win
 
+    def one_hot(self, grid=-1):
+        """
+        One hot encodes current grid state
+
+        grid: list containing state of the grid
+        """
+        mapp = {"":[1,0,0], "o":[0,1,0], "x":[0,0,1]}
+        one_hot_grid = []
+        
+        if grid == -1:
+            grid = self.grid
+
+        for i in range(9):
+            one_hot_grid = one_hot_grid + mapp[grid[i]]
+
+        return one_hot_grid
+
     def check_win(self):
         """
         Checks for win in grid

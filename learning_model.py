@@ -77,19 +77,6 @@ class play_and_train:
 
         self.device = 'cpu'
 
-    def one_hot(self, grid):
-        """
-        One hot encodes current grid state
-
-        """
-        mapp = {"":[1,0,0], "o":[0,1,0], "x":[0,0,1]}
-        one_hot_grid = []
-        
-        for i in range(9):
-            one_hot_grid = one_hot_grid + mapp[grid[i]]
-
-        return one_hot_grid
-
     def train_model(self, batch_size, num_batches):
         loss, optimizer = self.model.get_loss()
         # Data stuff
@@ -157,7 +144,7 @@ class play_and_train:
             reward_vector[game[i][-1]] = reward_multiplier[player]*(self.g**(math.floor((len(game) - i) / 2) - 1))
 
             # Append the one hot version of the game state and the corresponding q_table
-            states.append(self.one_hot(game[i][0]))
+            states.append(self.game.one_hot(game[i][0]))
             q_tables.append(reward_vector)    
             
         return (states, q_tables)
@@ -201,7 +188,7 @@ class play_and_train:
 
         returns index of selected move
         """
-        tensor_grid = torch.FloatTensor(self.one_hot(state))
+        tensor_grid = torch.FloatTensor(self.game.one_hot(state))
         output = self.model(Variable(tensor_grid).to(self.device))
         
         output = output.detach().numpy()
@@ -235,7 +222,15 @@ class play_and_train:
 
 if __name__ == "__main__":
     net = Mytictactoe()
-    player = play_and_train(net)
-    player.train_model(10, 1000)
+    with torch.no_grad():
+        from copy import deepcopy
+        # print(float(torch.max(net.fc1.weight)))
+        # print(net.fc1.weight[0])
+        asdf = deepcopy(net)
+        asdf.fc1.weight[0,0] = 1000
+        print(asdf.fc1.weight[0,0])
+        print(net.fc1.weight[0,0])
+    # player = play_and_train(net)
+    # player.train_model(10, 1000)
 
-    player.play_game(False)
+    # player.play_game(False)
