@@ -222,15 +222,8 @@ class play_and_train:
 
 if __name__ == "__main__":
     net = Mytictactoe()
-    with torch.no_grad():
-        from copy import deepcopy
-        # print(float(torch.max(net.fc1.weight)))
-        # print(net.fc1.weight[0])
-        asdf = deepcopy(net)
-        asdf.fc1.weight[0,0] = 1000
-        print(asdf.fc1.weight[0,0])
-        print(net.fc1.weight[0,0])
-    # player = play_and_train(net)
-    # player.train_model(10, 1000)
+    
+    player = play_and_train(net)
+    player.train_model(10, 10)
 
-    # player.play_game(False)
+    player.play_game(False)
