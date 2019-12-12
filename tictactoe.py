@@ -1,4 +1,6 @@
 import learning_model
+import evolution
+import torch
 
 class tictactoe:
     def __init__(self):
@@ -128,20 +130,83 @@ class tictactoe:
                     return self.grid[i]
         return ""
 
+def play_against_net():
+    """
+    Plays a game against a network as a human where they can choose which net to play against
+    """
+    model = input("Choose a model: enter '1' to play against the reinforcement learning model and enter '2' for the evolutionary AI model.\n").strip()
+    order = input("If you want to go first, enter '1' If you want to go second, enter '2'\n").strip()
+    order = int(order)
 
-# if __name__ == "__main__":
-    # asdf = tictactoe()
-    # asdf.update_grid([1,'x#'])
-    # asdf.update_grid([4,'x'])
-    # asdf.update_grid([7,'x'])
-    # asdf.clear_grid()
+    # RL
+    if model == '1':
+        print("you are playing against the reinforcement learning model!\n")
+        # loads the network and plays game
+        net = learning_model.Mytictactoe()
+        player = learning_model.play_and_train(net)
+        winner = player.play_human(order)
+        print(winner)
     
-    # asdf.update_grid([2,'o'])
-    # asdf.update_grid([4,'o'])
-    # asdf.update_grid([6,'o'])
+    # EV
+    elif model == '2':
+        print("you are playing against the evolutionary AI model!\n")        
+        # loads the network and plays game
+        player = evolution.Player()
+        player = evolution.load_model(player)
+        game = tictactoe()
+        winner = evolution.play_human(order, game, player)
+        print(winner)
+    
+    # Error
+    else:
+        print("Please input either 1 or 2")
 
-    # asdf.clear_grid()
-    
-    # asdf.update_grid([0,'o'])
-    # asdf.update_grid([1,'o'])
-    # asdf.update_grid([2,'o'])
+def pit_models(order=1):
+    """
+    Player 1 is RL, player 2 is EV, load the models and play against each other
+    """
+    # loads both models
+    player1 = learning_model.Mytictactoe()
+    player1.load_state_dict(torch.load('rl.pth'))
+    player2 = evolution.Player()
+    player2.load_state_dict(torch.load('ev.pth'))
+
+    # plays a game depending on which model will go first
+    game = tictactoe()
+    game.clear_grid()
+    turn = ['x', 'o']
+    if order%2 == 1:
+        for i in range(9):
+            one_hot = game.one_hot()
+            state = game.get_grid()
+
+            if i%2 == 0:
+                move = evolution.greedy_move(player1, one_hot, state)
+            else:    
+                move = evolution.greedy_move(player2, one_hot, state)
+
+            winner = game.update_grid(move, turn[i%2])
+            print(game)
+            if winner is not "":
+                break
+        
+    else:
+        for i in range(9):
+            one_hot = game.one_hot()
+            state = game.get_grid()
+
+            if i%2 == 1:
+                move = evolution.greedy_move(player1, one_hot, state)
+            else:    
+                move = evolution.greedy_move(player2, one_hot, state)
+
+            winner = game.update_grid(move, turn[i%2])
+            print(game)
+            if winner is not "":
+                break
+    return winner
+
+
+if __name__ == "__main__":
+    play_against_net()
+    # pit_models(order=1)

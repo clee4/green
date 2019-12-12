@@ -70,6 +70,7 @@ class play_and_train:
         self.game = tictactoe.tictactoe()
         self.model = model
         
+        # attempts to load a model and keep previous training
         try:
             self.load_model()
             print("model loaded")
@@ -84,14 +85,16 @@ class play_and_train:
         self.device = 'cpu'
 
     def save_model(self):
+        # saves the weights from the model
         torch.save(self.model.state_dict(), "rl.pth")
     
     def load_model(self):
+        # loads the weights from the file a model was saved at
         self.model.load_state_dict(torch.load('rl.pth'))
 
     def train_model(self, batch_size, num_batches):
         loss, optimizer = self.model.get_loss()
-        # Data stuff
+        # Tells you % completion
         for i in range(num_batches):
             if (100*(i+1)/num_batches % 5 == 0):
                 print(100*(i+1)/num_batches, "% training completion")
@@ -165,41 +168,93 @@ class play_and_train:
         """
         return list of game states and which move was made at each turn
         """
+        # clears the grid
         self.game.clear_grid()
         player = ['x', 'o']
 
         states = []
         
+        # Plays a game
         for i in range(9):
+            # decides if the player will explore new moves this turn
             explore = True if random.random() < self.e else False
+            # defines which player is playing based on even or odd turn
             turn = player[i%2]
             state = self.game.get_grid()
             
-
-            if explore and not training:
+            # while training, we want new moves
+            if explore and training:
                 move = self.random_move()
+
+            # while not training or exploring, we just want the best move
             else:
+                # gets best move
                 move = self.greedy_move(state)
             
+            # appends the states to add to q table
             states.append([state, move])
 
+            #updates grid and checks win case
             winner = self.game.update_grid(move, turn)
 
-            if not training:
-                print(self.game)
-
-            # this will need to be tweaked to work better for rewards
+            # breaks if there is a winner before all tiles are filled
             if winner is not "":
                 break
         
         return (states, winner)
-    
+
+    def play_human(self, order):
+        """
+        Plays a game against a human with input
+        """
+        self.game.clear_grid()
+        player = ['x', 'o']
+
+
+        # if the human is going first:
+        if order%2 == 1:
+            for i in range(9):
+                state = self.game.get_grid()
+                print(self.game)
+                turn = player[i%2]
+
+                if i%2 == 0:
+                    move = int(input("Enter your move 1 through 9 going from left to right, top to bottom\n"))-1
+                else:    
+                    move = self.greedy_move(state)
+
+                winner = self.game.update_grid(move, turn)
+
+                if winner is not "":
+                    break
+            return winner
+        
+        # If the human is going second
+        else:
+            for i in range(9):
+                state = self.game.get_grid()
+                print(self.game)
+                turn = player[i%2]
+
+                if i%2 == 1:
+                    move = int(input("Enter your move 1 through 9 going from left to right, top to bottom\n"))-1
+                else:    
+                    move = self.greedy_move(state)
+
+                winner = self.game.update_grid(move, turn)
+
+                if winner is not "":
+                    break
+            
+            return winner
+
     def greedy_move(self, state):
         """
         Selects best move based on q table
 
         returns index of selected move
         """
+        # Uses the model with the one_hot state to find all move probabilities
         tensor_grid = torch.FloatTensor(self.game.one_hot(state))
         output = self.model(Variable(tensor_grid).to(self.device))
         
@@ -207,7 +262,7 @@ class play_and_train:
 
         # Make sure that the move is legal
         while True:
-            #print(output, "\n", state)
+            # finds highest probability (best move) unless illegal
             best_move = np.argmax(output)
             if state[best_move] is "":
                 return best_move
@@ -235,9 +290,9 @@ class play_and_train:
 if __name__ == "__main__":
     net = Mytictactoe()
     
-    player = play_and_train(net)
-    player.train_model(48, 200)
+    player = play_and_train(net, explore=.3)
+    player.train_model(500, 500)
 
-    player.play_game(False)
+    player.play_game(True)
 
     player.save_model()

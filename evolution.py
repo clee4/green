@@ -161,10 +161,53 @@ def play_game(player1, player2, first, game):
     scores = {'x':1, '':1, 'o':-1}
     return scores[winner]
 
+def play_human(order, game, player):
+    """
+    Plays game against a human player
+    """
+    game.clear_grid()
+    turn = ['x', 'o']
+
+    if order%2 == 1:
+        for i in range(9):
+            one_hot = game.one_hot()
+            state = game.get_grid()
+            print(game)
+
+            if i%2 == 0:
+                move = int(input("Enter your move 1 through 9 going from left to right, top to bottom\n"))-1
+            else:    
+                move = greedy_move(player, one_hot, state)
+
+            winner = game.update_grid(move, turn[i%2])
+
+            if winner is not "":
+                break
+        return winner
+        
+    else:
+        for i in range(9):
+            one_hot = game.one_hot()
+            state = game.get_grid()
+            print(game)
+
+            if i%2 == 1:
+                move = int(input("Enter your move 1 through 9 going from left to right, top to bottom\n"))-1
+            else:    
+                move = greedy_move(player, one_hot, state)
+
+            winner = game.update_grid(move, turn[i%2])
+
+            if winner is not "":
+                break
+        return winner
+
 def save_model(player):
+    # saves model with trained weights
     torch.save(player.state_dict(), "ev.pth")
 
 def load_model(player):
+    # loads a saved model from a .pth file
     player.load_state_dict(torch.load('ev.pth'))
     return player
 
@@ -177,10 +220,10 @@ if __name__ == "__main__":
         print("Model not trained")
 
     game = tictactoe.tictactoe()
-    for i in range(50):
+    for i in range(200):
         print(i)
         print(game)
-        players = make_children(player, num_children=40)
+        players = make_children(player, num_children=100)
         player = tournament(players, game)
     
     save_model(player)
