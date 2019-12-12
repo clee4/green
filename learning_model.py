@@ -66,9 +66,15 @@ class Mytictactoe(nn.Module):
         
     
 class play_and_train:
-    def __init__(self, model, discount=.85, explore=.35):
+    def __init__(self, model, discount=.85, explore=.4):
         self.game = tictactoe.tictactoe()
         self.model = model
+        
+        try:
+            self.load_model()
+            print("model loaded")
+        except:
+            print("model not trained")
 
         # discount factor
         self.g = discount
@@ -76,6 +82,12 @@ class play_and_train:
         self.e = explore
 
         self.device = 'cpu'
+
+    def save_model(self):
+        torch.save(self.model.state_dict(), "rl.pth")
+    
+    def load_model(self):
+        self.model.load_state_dict(torch.load('rl.pth'))
 
     def train_model(self, batch_size, num_batches):
         loss, optimizer = self.model.get_loss()
@@ -126,7 +138,7 @@ class play_and_train:
         winner = x,o,empty
         """
         # reward_multiplier establishes the rewards for each player given win case
-        reward_multiplier = {"x":1, "o":1}
+        reward_multiplier = {"x":2, "o":2}
 
         if winner is "x":
             reward_multiplier = {"x":1, "o":-1}
@@ -224,6 +236,8 @@ if __name__ == "__main__":
     net = Mytictactoe()
     
     player = play_and_train(net)
-    player.train_model(10, 10)
+    player.train_model(48, 200)
 
     player.play_game(False)
+
+    player.save_model()

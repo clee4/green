@@ -161,14 +161,29 @@ def play_game(player1, player2, first, game):
     scores = {'x':1, '':1, 'o':-1}
     return scores[winner]
 
+def save_model(player):
+    torch.save(player.state_dict(), "ev.pth")
+
+def load_model(player):
+    player.load_state_dict(torch.load('ev.pth'))
+    return player
+
 if __name__ == "__main__":
     player = Player()
+    try:
+        player = load_model(player)
+        print("Model loaded")
+    except:
+        print("Model not trained")
+
     game = tictactoe.tictactoe()
     for i in range(50):
         print(i)
         print(game)
         players = make_children(player, num_children=40)
         player = tournament(players, game)
+    
+    save_model(player)
     
 
     
