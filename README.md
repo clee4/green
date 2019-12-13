@@ -1,4 +1,4 @@
-# Using Evolutionary AI and Reinforcement Learning to learn Tic-Tac-Toe
+# Using Evolutionary AI and Reinforcement Learning to Learn Tic-Tac-Toe
 ### Chris Lee and David Tarazi
 
 ## Our Goals
@@ -23,3 +23,5 @@ Had we enabled the bot to play against a few good players to train instead of pl
 ## Testing
 When the bots play against each other, the same outcome happens every time, and the reinforcement learning model always wins. Not only was this model quicker, it was also a better performing model and learned an optimal winning strategy. However, it appears as though this strategy was not developed well enough because it doesn't adapt very well to a human making a move it isn't used to. Thus, we could have used some more random manipulation and introduced more strategies to optimize the networks. 
 
+## Files
+Running tictactoe.py will enable you to play against one of the pretrained models and has the actual game board code. evolution.py has the model, training, and gameplay for the evolutionary AI model. learning_model.py has the reinforcement learning model implementation and allows you to train that network. ev.pth is the saved trained pytorch model for the evolutionary model, and rl.pth is the saved trained pytorch model for reinforcement learning model.
